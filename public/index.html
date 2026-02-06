@@ -774,6 +774,118 @@
     .toast .toast-emoji { font-size: 28px; }
     .toast .toast-text { font-size: 13px; color: #5A4B81; font-weight: 600; }
 
+    /* 微信绑定模块 */
+    .wx-module {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .wx-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #888;
+      font-weight: 600;
+    }
+
+    .wx-info .wx-icon { font-size: 20px; }
+
+    .wx-status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .wx-status-dot.bound { background: #69f0ae; box-shadow: 0 0 4px rgba(105,240,174,0.5); }
+    .wx-status-dot.unbound { background: #ffab40; }
+
+    .btn-wx {
+      padding: 8px 18px;
+      border: none;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-wx.bind {
+      background: linear-gradient(135deg, #07c160, #06ad56);
+      color: white;
+    }
+
+    .btn-wx.unbind {
+      background: rgba(237,232,245,0.6);
+      color: #999;
+    }
+
+    .btn-wx:hover { transform: translateY(-1px); }
+
+    /* 二维码弹窗 */
+    .qr-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(90,75,129,0.35);
+      backdrop-filter: blur(6px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      animation: fadeIn 0.3s ease;
+      padding: 20px;
+    }
+
+    .qr-card {
+      background: white;
+      border-radius: 12px;
+      padding: 36px 32px;
+      text-align: center;
+      max-width: 320px;
+      width: 100%;
+      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 25px 80px rgba(90,75,129,0.2);
+    }
+
+    .qr-card .qr-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #5A4B81;
+      margin-bottom: 6px;
+    }
+
+    .qr-card .qr-desc {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+
+    .qr-card img {
+      width: 200px;
+      height: 200px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+
+    .qr-card .qr-loading {
+      width: 200px;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      background: #f5f3fa;
+      border-radius: 8px;
+      color: #b8a9cc;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
     @media (max-width: 400px) {
       .mood-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
       .mood-btn .emoji { font-size: 28px; }
@@ -875,6 +987,18 @@
         </div>
       </div>
 
+      <div class="module" id="wx-module">
+        <div class="module-title">微信通知</div>
+        <div class="wx-module">
+          <div class="wx-info">
+            <span class="wx-icon">💬</span>
+            <span class="wx-status-dot unbound" id="wx-status-dot"></span>
+            <span id="wx-status-text">未绑定</span>
+          </div>
+          <button class="btn-wx bind" id="wx-bind-btn" onclick="handleWxBind()">绑定微信</button>
+        </div>
+      </div>
+
       <div class="module" id="history-module">
         <div class="module-title">心情互动</div>
         <div class="history-list" id="history-list">
@@ -954,6 +1078,7 @@
       mainScreen.classList.add('active');
       requestNotificationPermission();
       connectWebSocket();
+      checkWxBindStatus();
     }
 
     function requestNotificationPermission() {
@@ -983,6 +1108,7 @@
         if (msg.type === 'user_online') showOnlineToast(msg.username, true);
         if (msg.type === 'user_offline') showOnlineToast(msg.username, false);
         if (msg.type === 'msg_recalled') handleRecall(msg);
+        if (msg.type === 'wx_bindstatus') updateWxBindUI(msg.bound);
       };
 
       ws.onclose = () => {
@@ -1210,6 +1336,104 @@
       toast.innerHTML = '<span class="toast-emoji">' + emoji + '</span><span class="toast-text">' + text + '</span>';
       toastContainer.appendChild(toast);
       setTimeout(() => toast.remove(), 5000);
+    }
+
+    // ===== 微信绑定 =====
+    let wxBound = false;
+
+    function checkWxBindStatus() {
+      fetch('/api/wx/status?room=' + encodeURIComponent(currentRoom) + '&username=' + encodeURIComponent(currentUser))
+        .then(r => r.json())
+        .then(data => { if (data.ok) updateWxBindUI(data.bound); })
+        .catch(() => {});
+    }
+
+    function updateWxBindUI(bound) {
+      wxBound = bound;
+      const dot = document.getElementById('wx-status-dot');
+      const text = document.getElementById('wx-status-text');
+      const btn = document.getElementById('wx-bind-btn');
+      if (bound) {
+        dot.className = 'wx-status-dot bound';
+        text.textContent = '已绑定';
+        btn.textContent = '解绑';
+        btn.className = 'btn-wx unbind';
+      } else {
+        dot.className = 'wx-status-dot unbound';
+        text.textContent = '未绑定';
+        btn.textContent = '绑定微信';
+        btn.className = 'btn-wx bind';
+      }
+    }
+
+    function handleWxBind() {
+      if (wxBound) {
+        // 解绑
+        fetch('/api/wx/unbind', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ room: currentRoom, username: currentUser })
+        }).then(r => r.json()).then(data => {
+          if (data.ok) {
+            updateWxBindUI(false);
+            showToast('💬', '已解绑微信通知');
+          }
+        });
+      } else {
+        // 显示二维码
+        showWxQrCode();
+      }
+    }
+
+    function showWxQrCode() {
+      const overlay = document.createElement('div');
+      overlay.className = 'qr-overlay';
+      overlay.innerHTML =
+        '<div class="qr-card">' +
+          '<div class="qr-title">绑定微信通知</div>' +
+          '<div class="qr-desc">微信扫描下方二维码关注<br>之后收到心情会推送到微信</div>' +
+          '<div class="qr-loading" id="qr-loading">加载中...</div>' +
+          '<button class="btn-dismiss" onclick="this.closest(\'.qr-overlay\').remove()">关闭</button>' +
+        '</div>';
+      document.body.appendChild(overlay);
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+      // 请求二维码
+      fetch('/api/wx/qrcode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ room: currentRoom, username: currentUser })
+      }).then(r => r.json()).then(data => {
+        const loading = document.getElementById('qr-loading');
+        if (!loading) return;
+        if (data.code === 1000 && data.data && data.data.url) {
+          const img = document.createElement('img');
+          img.src = data.data.url;
+          img.alt = '微信扫码关注';
+          loading.replaceWith(img);
+          // 轮询绑定状态
+          const pollInterval = setInterval(() => {
+            fetch('/api/wx/status?room=' + encodeURIComponent(currentRoom) + '&username=' + encodeURIComponent(currentUser))
+              .then(r => r.json())
+              .then(d => {
+                if (d.ok && d.bound) {
+                  clearInterval(pollInterval);
+                  updateWxBindUI(true);
+                  const qrOverlay = document.querySelector('.qr-overlay');
+                  if (qrOverlay) qrOverlay.remove();
+                  showToast('✅', '微信通知绑定成功！');
+                }
+              }).catch(() => {});
+          }, 3000);
+          // 5分钟后停止轮询
+          setTimeout(() => clearInterval(pollInterval), 5 * 60 * 1000);
+        } else {
+          loading.textContent = '二维码获取失败，请重试';
+        }
+      }).catch(() => {
+        const loading = document.getElementById('qr-loading');
+        if (loading) loading.textContent = '网络错误，请重试';
+      });
     }
 
     function playNotifSound() {

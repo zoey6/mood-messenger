@@ -1,17 +1,158 @@
 const express = require('express');
 const http = require('http');
+const https = require('https');
 const WebSocket = require('ws');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
+// WxPusher 配置
+const WXPUSHER_APP_TOKEN = process.env.WXPUSHER_APP_TOKEN || 'AT_cMB7gxksDNsH4XYTwpImIlw9PD6IMY3d';
+
+// 存储 WxPusher UID 绑定 { "room:username" -> wxpusherUid }
+const wxBindingsFile = path.join(__dirname, 'wx-bindings.json');
+let wxBindings = {};
+try {
+  if (fs.existsSync(wxBindingsFile)) {
+    wxBindings = JSON.parse(fs.readFileSync(wxBindingsFile, 'utf8'));
+  }
+} catch(e) { wxBindings = {}; }
+
+function saveWxBindings() {
+  fs.writeFileSync(wxBindingsFile, JSON.stringify(wxBindings, null, 2));
+}
+
 // 静态文件服务
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 照片上传 - 接收 base64 JSON
+// JSON 解析
 app.use(express.json({ limit: '5mb' }));
+
+// ===== WxPusher API 路由 =====
+
+// 绑定微信 UID
+app.post('/api/wx/bind', (req, res) => {
+  const { room, username, uid } = req.body;
+  if (!room || !username || !uid) return res.json({ ok: false, msg: '参数不完整' });
+  const key = `${room}:${username}`;
+  wxBindings[key] = uid;
+  saveWxBindings();
+  console.log(`[微信绑定] ${key} -> ${uid}`);
+  res.json({ ok: true });
+});
+
+// 解绑微信
+app.post('/api/wx/unbind', (req, res) => {
+  const { room, username } = req.body;
+  const key = `${room}:${username}`;
+  delete wxBindings[key];
+  saveWxBindings();
+  console.log(`[微信解绑] ${key}`);
+  res.json({ ok: true });
+});
+
+// 查询绑定状态
+app.get('/api/wx/status', (req, res) => {
+  const { room, username } = req.query;
+  const key = `${room}:${username}`;
+  res.json({ ok: true, bound: !!wxBindings[key] });
+});
+
+// 创建关注二维码（带参数，用于自动绑定）
+app.post('/api/wx/qrcode', (req, res) => {
+  const { room, username } = req.body;
+  if (!room || !username) return res.json({ ok: false, msg: '参数不完整' });
+  const extra = JSON.stringify({ room, username });
+  const postData = JSON.stringify({
+    appToken: WXPUSHER_APP_TOKEN,
+    extra,
+    validTime: 1800 // 30分钟有效
+  });
+
+  const options = {
+    hostname: 'wxpusher.zjiecode.com',
+    path: '/api/fun/create/qrcode',
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(postData) }
+  };
+
+  const apiReq = https.request(options, (apiRes) => {
+    let body = '';
+    apiRes.on('data', d => body += d);
+    apiRes.on('end', () => {
+      try {
+        const result = JSON.parse(body);
+        res.json(result);
+      } catch(e) { res.json({ ok: false, msg: '解析失败' }); }
+    });
+  });
+  apiReq.on('error', (e) => res.json({ ok: false, msg: e.message }));
+  apiReq.write(postData);
+  apiReq.end();
+});
+
+// WxPusher 回调（用户扫码关注后自动绑定）
+app.get('/api/wx/callback', (req, res) => {
+  const { action, data } = req.query;
+  console.log('[WxPusher回调]', action, data);
+  try {
+    if (action === 'app_subscribe') {
+      const parsed = JSON.parse(data);
+      const { uid, extra } = parsed;
+      if (extra && uid) {
+        const { room, username } = JSON.parse(extra);
+        if (room && username) {
+          const key = `${room}:${username}`;
+          wxBindings[key] = uid;
+          saveWxBindings();
+          console.log(`[自动绑定] ${key} -> ${uid}`);
+          // 通知在线的该用户
+          for (const [clientWs, info] of clients) {
+            if (info.username === username && info.room === room && clientWs.readyState === WebSocket.OPEN) {
+              clientWs.send(JSON.stringify({ type: 'wx_bindstatus', bound: true }));
+            }
+          }
+        }
+      }
+    }
+  } catch(e) { console.error('回调解析错误:', e); }
+  res.send('success');
+});
+
+// WxPusher 推送函数
+function wxPushMessage(uid, title, content) {
+  const postData = JSON.stringify({
+    appToken: WXPUSHER_APP_TOKEN,
+    content,
+    summary: title,
+    contentType: 1,
+    uids: [uid]
+  });
+
+  const options = {
+    hostname: 'wxpusher.zjiecode.com',
+    path: '/api/send/message',
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(postData) }
+  };
+
+  const apiReq = https.request(options, (apiRes) => {
+    let body = '';
+    apiRes.on('data', d => body += d);
+    apiRes.on('end', () => {
+      try {
+        const result = JSON.parse(body);
+        console.log(`[微信推送] ${result.code === 1000 ? '成功' : '失败'}: ${title}`);
+      } catch(e) {}
+    });
+  });
+  apiReq.on('error', (e) => console.error('[微信推送错误]', e.message));
+  apiReq.write(postData);
+  apiReq.end();
+}
 
 // 存储在线用户 { ws -> { username, room } }
 const clients = new Map();
@@ -73,6 +214,15 @@ wss.on('connection', (ws) => {
           photo: photo || '',
           timestamp: new Date().toISOString()
         }));
+
+        // WxPusher 微信推送（如果目标用户绑定了微信）
+        const wxKey = `${currentRoom}:${to}`;
+        if (wxBindings[wxKey]) {
+          const wxTitle = `${emoji} ${from} 发来一份心情`;
+          let wxContent = `${from} 现在的心情是「${mood}」${emoji}`;
+          if (message) wxContent += `\n💬 "${message}"`;
+          wxPushMessage(wxBindings[wxKey], wxTitle, wxContent);
+        }
       }
 
       // 已读回执
