@@ -1025,6 +1025,7 @@
     let selectedMoodBtn = null;
     let reconnectTimer = null;
     let pendingPhoto = null;
+    let heartbeatTimer = null;
 
     const loginScreen = document.getElementById('login-screen');
     const mainScreen = document.getElementById('main-screen');
@@ -1097,6 +1098,13 @@
         statusText.textContent = '已连接';
         ws.send(JSON.stringify({ type: 'register', username: currentUser, room: currentRoom }));
         if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+        // 客户端心跳：每20秒发一次ping保持连接
+        if (heartbeatTimer) clearInterval(heartbeatTimer);
+        heartbeatTimer = setInterval(() => {
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'ping' }));
+          }
+        }, 20000);
       };
 
       ws.onmessage = (event) => {
@@ -1114,6 +1122,7 @@
       ws.onclose = () => {
         statusDot.className = 'status-indicator offline';
         statusText.textContent = '重连中';
+        if (heartbeatTimer) { clearInterval(heartbeatTimer); heartbeatTimer = null; }
         reconnectTimer = setTimeout(connectWebSocket, 3000);
       };
 

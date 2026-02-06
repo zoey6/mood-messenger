@@ -159,7 +159,25 @@ const clients = new Map();
 // 消息 ID 计数器
 let msgIdCounter = 0;
 
+// 心跳检测：每25秒ping一次，防止代理/平台超时断开
+const HEARTBEAT_INTERVAL = 25000;
+const heartbeatTimer = setInterval(() => {
+  wss.clients.forEach((ws) => {
+    if (ws.isAlive === false) {
+      console.log('[心跳] 客户端无响应，断开');
+      return ws.terminate();
+    }
+    ws.isAlive = false;
+    ws.ping();
+  });
+}, HEARTBEAT_INTERVAL);
+
+wss.on('close', () => clearInterval(heartbeatTimer));
+
 wss.on('connection', (ws) => {
+  ws.isAlive = true;
+  ws.on('pong', () => { ws.isAlive = true; });
+
   let currentUser = null;
   let currentRoom = null;
 
@@ -238,6 +256,12 @@ wss.on('connection', (ws) => {
             }));
           }
         }
+      }
+
+      // 心跳响应（客户端主动发的ping）
+      if (msg.type === 'ping') {
+        ws.send(JSON.stringify({ type: 'pong' }));
+        return;
       }
 
       // 消息撤回
