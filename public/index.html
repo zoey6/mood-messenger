@@ -14,14 +14,13 @@
       min-height: 100vh;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
       padding: 20px;
       overflow-x: hidden;
       line-height: 1.5;
       position: relative;
     }
 
-    /* ===== 漂浮粒子背景 ===== */
     .particles {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -31,14 +30,14 @@
     }
     .particle {
       position: absolute;
-      opacity: 0.18;
+      opacity: 0.13;
       animation: floatUp linear infinite;
       font-size: 20px;
     }
     @keyframes floatUp {
       0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-      10% { opacity: 0.18; }
-      90% { opacity: 0.18; }
+      10% { opacity: 0.13; }
+      90% { opacity: 0.13; }
       100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
     }
 
@@ -47,14 +46,14 @@
       max-width: 460px;
       position: relative;
       z-index: 1;
+      padding-top: 20px;
     }
 
-    /* ===== 登录卡片 ===== */
     .card {
       background: rgba(255,255,255,0.88);
-      border-radius: 28px;
+      border-radius: 12px;
       padding: 48px 32px 40px;
-      box-shadow: 0 20px 60px rgba(161,140,209,0.2);
+      box-shadow: 0 12px 40px rgba(161,140,209,0.12);
       backdrop-filter: blur(20px);
       animation: slideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1);
     }
@@ -76,14 +75,12 @@
       letter-spacing: -0.5px;
     }
 
-    .input-group {
-      margin-bottom: 18px;
-    }
+    .input-group { margin-bottom: 18px; }
 
     .input-group label {
       display: block;
       font-size: 13px;
-      color: #999;
+      color: #888;
       margin-bottom: 6px;
       font-weight: 600;
     }
@@ -92,7 +89,7 @@
       width: 100%;
       padding: 14px 18px;
       border: 2px solid #ede8f5;
-      border-radius: 14px;
+      border-radius: 12px;
       font-size: 15px;
       font-family: inherit;
       outline: none;
@@ -114,7 +111,7 @@
       background: linear-gradient(135deg, #a18cd1, #e091c9);
       color: white;
       border: none;
-      border-radius: 14px;
+      border-radius: 12px;
       font-size: 16px;
       font-weight: 700;
       font-family: inherit;
@@ -138,11 +135,9 @@
       line-height: 1.6;
     }
 
-    /* ===== 屏幕切换 ===== */
     #login-screen, #main-screen { display: none; }
     #login-screen.active, #main-screen.active { display: block; }
 
-    /* ===== 主界面顶部 ===== */
     .header {
       text-align: center;
       color: white;
@@ -193,13 +188,39 @@
     .status-indicator.online { background: #69f0ae; box-shadow: 0 0 6px rgba(105,240,174,0.6); }
     .status-indicator.offline { background: #ff5252; }
 
-    /* ===== 通用模块卡片 ===== */
+    /* 上下线提醒 */
+    .online-toast {
+      position: fixed;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.95);
+      border-radius: 24px;
+      padding: 10px 24px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #5A4B81;
+      box-shadow: 0 6px 24px rgba(90,75,129,0.15);
+      z-index: 998;
+      animation: onlineIn 0.4s ease, onlineOut 0.4s ease 2.6s forwards;
+      white-space: nowrap;
+      backdrop-filter: blur(10px);
+    }
+    @keyframes onlineIn {
+      from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+    @keyframes onlineOut {
+      from { opacity: 1; transform: translateX(-50%) translateY(0); }
+      to { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+    }
+
     .module {
       background: rgba(255,255,255,0.80);
-      border-radius: 20px;
+      border-radius: 12px;
       padding: 22px 24px;
       margin-bottom: 14px;
-      box-shadow: 0 8px 32px rgba(161,140,209,0.1);
+      box-shadow: 0 4px 20px rgba(161,140,209,0.08);
       backdrop-filter: blur(12px);
       animation: slideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1);
     }
@@ -207,19 +228,14 @@
     .module-title {
       font-size: 15px;
       font-weight: 700;
-      color: #5A4B81;
+      color: #E07A97;
       margin-bottom: 14px;
       display: flex;
       align-items: center;
       gap: 6px;
     }
 
-    /* ===== 用户列表 ===== */
-    .user-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
+    .user-list { display: flex; flex-wrap: wrap; gap: 10px; }
 
     .user-chip {
       padding: 9px 20px;
@@ -245,11 +261,7 @@
       box-shadow: 0 4px 14px rgba(161,140,209,0.3);
     }
 
-    .no-users {
-      text-align: center;
-      padding: 16px 0;
-      width: 100%;
-    }
+    .no-users { text-align: center; padding: 16px 0; width: 100%; }
 
     .no-users .waiting-text {
       color: #b8a9cc;
@@ -263,11 +275,8 @@
     }
 
     @keyframes dotPulse {
-      0% { content: ''; }
-      25% { opacity: 0.4; }
-      50% { opacity: 1; }
-      75% { opacity: 0.4; }
-      100% { opacity: 1; }
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
     }
 
     .invite-row {
@@ -278,11 +287,7 @@
       gap: 8px;
     }
 
-    .invite-text {
-      font-size: 12px;
-      color: #c4b0db;
-      font-weight: 600;
-    }
+    .invite-text { font-size: 12px; color: #c4b0db; font-weight: 600; }
 
     .btn-copy {
       padding: 6px 16px;
@@ -302,14 +307,11 @@
       box-shadow: 0 4px 12px rgba(161,140,209,0.3);
     }
 
-    .btn-copy.copied {
-      background: linear-gradient(135deg, #69f0ae, #00e676);
-    }
+    .btn-copy.copied { background: linear-gradient(135deg, #69f0ae, #00e676); }
 
-    /* ===== 心情选择网格 ===== */
     .mood-inner {
       background: rgba(250,247,255,0.5);
-      border-radius: 16px;
+      border-radius: 12px;
       padding: 14px;
     }
 
@@ -326,11 +328,12 @@
       justify-content: center;
       padding: 14px 6px;
       border: 2px solid transparent;
-      border-radius: 16px;
+      border-radius: 12px;
       cursor: pointer;
       transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
       position: relative;
       overflow: hidden;
+      background: transparent;
     }
 
     .mood-btn:hover {
@@ -339,7 +342,7 @@
       border-color: rgba(200,180,230,0.4);
     }
 
-    .mood-btn:active { transform: scale(0.95); }
+    .mood-btn:active { transform: scale(0.88); transition: transform 0.1s; }
 
     .mood-btn .emoji {
       font-size: 36px;
@@ -349,54 +352,53 @@
 
     .mood-btn:hover .emoji { transform: scale(1.15); }
 
-    .mood-btn .label {
-      font-size: 11px;
-      font-weight: 700;
-    }
+    .mood-btn .label { font-size: 11px; font-weight: 700; }
 
-    /* 马卡龙低饱和配色 */
     .mood-btn.happy { background: #FFF8E1; }
     .mood-btn.happy .label { color: #D4A017; }
-
     .mood-btn.unhappy { background: #E8F0FE; }
     .mood-btn.unhappy .label { color: #5B86C5; }
-
     .mood-btn.angry { background: #FDE8E8; }
     .mood-btn.angry .label { color: #D46A6A; }
-
     .mood-btn.speechless { background: #F3EAFA; }
     .mood-btn.speechless .label { color: #9B7FC4; }
-
     .mood-btn.sad { background: #E8EAF6; }
     .mood-btn.sad .label { color: #7986CB; }
-
     .mood-btn.numb { background: #ECEFF1; }
     .mood-btn.numb .label { color: #90A4AE; }
-
+    .mood-btn.confused { background: #E3EEF5; }
+    .mood-btn.confused .label { color: #6E99B4; }
     .mood-btn.anxious { background: #FFF3E0; }
     .mood-btn.anxious .label { color: #D4915E; }
 
-    /* 选中态 */
     .mood-btn.selected-mood {
       border-color: #e091c9;
       box-shadow: 0 0 0 3px rgba(224,145,201,0.2), 0 6px 20px rgba(0,0,0,0.06);
+      animation: moodBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes moodBounce {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.15); }
+      70% { transform: scale(0.95); }
+      100% { transform: scale(1); }
     }
 
     .mood-btn.selected-mood::before {
-      content: '';
+      content: '\2713';
       position: absolute;
-      top: 4px; right: 4px;
+      top: 3px; right: 3px;
       width: 18px; height: 18px;
       background: linear-gradient(135deg, #a18cd1, #e091c9);
       border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       font-size: 10px;
       color: white;
+      line-height: 18px;
     }
 
-    /* 发送成功动画 */
     .mood-btn.sent::after {
-      content: '✓';
+      content: '\2713';
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
       font-size: 32px;
@@ -405,7 +407,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 16px;
+      border-radius: 12px;
       animation: sentFade 1s ease forwards;
     }
 
@@ -415,7 +417,6 @@
       100% { opacity: 0; transform: scale(1.05); pointer-events: none; }
     }
 
-    /* ===== 附加文字输入 ===== */
     .msg-input-area {
       margin-top: 14px;
       display: none;
@@ -426,7 +427,7 @@
 
     .msg-input-row {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
     }
 
@@ -434,7 +435,7 @@
       flex: 1;
       padding: 12px 16px;
       border: 2px solid #ede8f5;
-      border-radius: 14px;
+      border-radius: 12px;
       font-size: 14px;
       font-family: inherit;
       outline: none;
@@ -446,12 +447,59 @@
     .msg-input:focus { border-color: #b794d6; }
     .msg-input::placeholder { color: #c4b8d9; }
 
+    .btn-photo {
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      border: 2px solid #ede8f5;
+      background: rgba(255,255,255,0.7);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: all 0.2s;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-photo:hover { border-color: #b794d6; background: rgba(237,232,245,0.5); }
+
+    .btn-photo input[type="file"] {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .btn-photo.has-photo { border-color: #69f0ae; background: rgba(105,240,174,0.1); }
+
+    .photo-preview-strip { margin-top: 10px; display: none; }
+    .photo-preview-strip.visible { display: flex; gap: 8px; align-items: center; }
+
+    .photo-preview-strip img {
+      width: 60px; height: 60px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid #ede8f5;
+    }
+
+    .photo-preview-strip .remove-photo {
+      background: none; border: none;
+      font-size: 18px; cursor: pointer;
+      color: #ccc; padding: 4px;
+      transition: color 0.2s;
+    }
+
+    .photo-preview-strip .remove-photo:hover { color: #e091c9; }
+
     .btn-send {
       padding: 12px 24px;
       background: linear-gradient(135deg, #a18cd1, #e091c9);
       color: white;
       border: none;
-      border-radius: 14px;
+      border-radius: 12px;
       font-size: 14px;
       font-weight: 700;
       font-family: inherit;
@@ -467,28 +515,40 @@
 
     .btn-send:active { transform: translateY(0); }
 
-    /* ===== 历史记录 ===== */
     .history-list {
-      max-height: 260px;
+      max-height: 400px;
       overflow-y: auto;
     }
 
     .history-list::-webkit-scrollbar { width: 4px; }
     .history-list::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
 
-    /* 气泡消息 */
+    /* 收到的消息（左对齐） */
     .bubble {
       display: flex;
-      gap: 12px;
-      padding: 14px;
-      background: rgba(250,247,255,0.6);
-      border-radius: 16px;
+      gap: 10px;
+      padding: 12px;
+      background: white;
+      border-radius: 4px 12px 12px 12px;
       margin-bottom: 10px;
       animation: bubbleIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
       transition: background 0.2s;
+      box-shadow: 0 2px 8px rgba(161,140,209,0.06);
+      position: relative;
     }
 
-    .bubble:hover { background: rgba(245,240,255,0.8); }
+    .bubble:hover { background: #fdfbff; }
+
+    /* 自己发送的（右对齐） */
+    .bubble.sent-bubble {
+      flex-direction: row-reverse;
+      background: linear-gradient(135deg, #fce4f3 0%, #f0e0fa 100%);
+      border-radius: 12px 4px 12px 12px;
+    }
+
+    .bubble.sent-bubble .b-content { align-items: flex-end; }
+    .bubble.sent-bubble .b-header { flex-direction: row-reverse; }
+    .bubble.sent-bubble .b-footer { flex-direction: row-reverse; }
 
     @keyframes bubbleIn {
       from { opacity: 0; transform: translateY(12px) scale(0.96); }
@@ -497,7 +557,7 @@
 
     .bubble .b-emoji { font-size: 32px; flex-shrink: 0; }
 
-    .bubble .b-content { flex: 1; min-width: 0; }
+    .bubble .b-content { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 
     .bubble .b-header {
       display: flex;
@@ -506,36 +566,69 @@
       margin-bottom: 2px;
     }
 
-    .bubble .b-name {
-      font-size: 13px;
-      font-weight: 700;
-      color: #5A4B81;
-    }
-
-    .bubble .b-mood {
-      font-size: 12px;
-      color: #b8a9cc;
-      font-weight: 600;
-    }
+    .bubble .b-name { font-size: 13px; font-weight: 700; color: #5A4B81; }
+    .bubble .b-mood { font-size: 12px; color: #b8a9cc; font-weight: 600; }
 
     .bubble .b-msg {
       font-size: 13px;
-      color: #777;
+      color: #888;
       margin-top: 2px;
       word-break: break-all;
     }
 
-    .bubble .b-time {
-      font-size: 11px;
-      color: #ccc;
+    .bubble .b-photo {
+      margin-top: 6px;
+      max-width: 180px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .bubble .b-photo:hover { transform: scale(1.02); }
+
+    .bubble .b-footer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       margin-top: 4px;
     }
 
-    /* 空状态 */
-    .empty-state {
-      text-align: center;
-      padding: 28px 0 16px;
+    .bubble .b-time { font-size: 11px; color: #ccc; }
+
+    .bubble .b-read-status {
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      transition: all 0.3s;
     }
+
+    .bubble .b-read-status.unread { color: #ccc; }
+    .bubble .b-read-status.read { color: #69f0ae; }
+
+    .b-read-status.read .check-icon { animation: checkFill 0.4s ease; }
+
+    @keyframes checkFill {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
+
+    .bubble .b-recall {
+      font-size: 11px; color: #ccc; cursor: pointer;
+      border: none; background: none;
+      font-family: inherit; padding: 0;
+      transition: color 0.2s;
+    }
+
+    .bubble .b-recall:hover { color: #e091c9; }
+
+    .bubble.recalled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .empty-state { text-align: center; padding: 28px 0 16px; }
 
     .empty-state .empty-illustration {
       font-size: 56px;
@@ -547,9 +640,31 @@
       font-size: 13px;
       color: #c4b8d9;
       font-weight: 600;
+      line-height: 1.8;
     }
 
-    /* ===== 通知弹窗 ===== */
+    /* 照片放大 */
+    .photo-lightbox {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      animation: fadeIn 0.3s ease;
+      cursor: pointer;
+      padding: 20px;
+    }
+
+    .photo-lightbox img {
+      max-width: 90%; max-height: 90%;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      animation: popIn 0.3s ease;
+    }
+
+    /* 通知弹窗 */
     .notification-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -570,7 +685,7 @@
 
     .notification-card {
       background: white;
-      border-radius: 28px;
+      border-radius: 12px;
       padding: 44px 32px 36px;
       text-align: center;
       max-width: 340px;
@@ -595,40 +710,25 @@
       to { transform: translateY(-8px); }
     }
 
-    .notification-card .notif-title {
-      font-size: 18px;
-      font-weight: 800;
-      color: #5A4B81;
-      margin-bottom: 6px;
+    .notification-card .notif-title { font-size: 18px; font-weight: 800; color: #5A4B81; margin-bottom: 6px; }
+    .notification-card .notif-body { font-size: 15px; color: #888; margin-bottom: 6px; line-height: 1.6; }
+    .notification-card .notif-msg { font-size: 14px; color: #a18cd1; font-weight: 600; margin-bottom: 8px; font-style: italic; }
+
+    .notification-card .notif-photo {
+      max-width: 200px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      cursor: pointer;
     }
 
-    .notification-card .notif-body {
-      font-size: 15px;
-      color: #777;
-      margin-bottom: 6px;
-      line-height: 1.6;
-    }
-
-    .notification-card .notif-msg {
-      font-size: 14px;
-      color: #a18cd1;
-      font-weight: 600;
-      margin-bottom: 8px;
-      font-style: italic;
-    }
-
-    .notification-card .notif-time {
-      font-size: 11px;
-      color: #ccc;
-      margin-bottom: 22px;
-    }
+    .notification-card .notif-time { font-size: 11px; color: #ccc; margin-bottom: 22px; }
 
     .btn-dismiss {
       padding: 13px 44px;
       background: linear-gradient(135deg, #a18cd1, #e091c9);
       color: white;
       border: none;
-      border-radius: 14px;
+      border-radius: 12px;
       font-size: 15px;
       font-weight: 700;
       font-family: inherit;
@@ -638,7 +738,6 @@
 
     .btn-dismiss:hover { transform: translateY(-2px); }
 
-    /* ===== Toast ===== */
     .toast-container {
       position: fixed;
       top: 20px;
@@ -651,7 +750,7 @@
 
     .toast {
       background: rgba(255,255,255,0.95);
-      border-radius: 16px;
+      border-radius: 12px;
       padding: 14px 20px;
       display: flex;
       align-items: center;
@@ -675,20 +774,18 @@
     .toast .toast-emoji { font-size: 28px; }
     .toast .toast-text { font-size: 13px; color: #5A4B81; font-weight: 600; }
 
-    /* ===== 响应式 ===== */
     @media (max-width: 400px) {
-      .mood-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-      .mood-btn .emoji { font-size: 30px; }
+      .mood-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+      .mood-btn .emoji { font-size: 28px; }
+      .mood-btn { padding: 10px 4px; }
       .card { padding: 32px 20px 28px; }
-      .module { padding: 18px 18px; }
+      .module { padding: 18px 16px; }
     }
   </style>
 </head>
 <body>
-  <!-- 漂浮粒子 -->
   <div class="particles" id="particles"></div>
 
-  <!-- 登录界面 -->
   <div class="container">
     <div id="login-screen" class="active">
       <div class="card">
@@ -706,7 +803,6 @@
       </div>
     </div>
 
-    <!-- 主界面 -->
     <div id="main-screen">
       <div class="header">
         <div class="logo-main">
@@ -727,7 +823,7 @@
             <div class="waiting-text">等待对方进入房间<span class="dots">...</span></div>
             <div class="invite-row">
               <span class="invite-text">邀请 ta 一起上线</span>
-              <button class="btn-copy" id="copy-link-btn" onclick="copyLink()">复制链接</button>
+              <button class="btn-copy" onclick="copyLink()">复制链接</button>
             </div>
           </div>
         </div>
@@ -738,59 +834,61 @@
         <div class="mood-inner">
           <div class="mood-grid" id="mood-grid">
             <button class="mood-btn happy" data-mood="开心" data-emoji="😄" onclick="selectMood(this)">
-              <span class="emoji">😄</span>
-              <span class="label">开心</span>
+              <span class="emoji">😄</span><span class="label">开心</span>
             </button>
             <button class="mood-btn unhappy" data-mood="不开心" data-emoji="😞" onclick="selectMood(this)">
-              <span class="emoji">😞</span>
-              <span class="label">不开心</span>
+              <span class="emoji">😞</span><span class="label">不开心</span>
             </button>
             <button class="mood-btn angry" data-mood="生气" data-emoji="😡" onclick="selectMood(this)">
-              <span class="emoji">😡</span>
-              <span class="label">生气</span>
+              <span class="emoji">😡</span><span class="label">生气</span>
             </button>
             <button class="mood-btn speechless" data-mood="无语" data-emoji="😑" onclick="selectMood(this)">
-              <span class="emoji">😑</span>
-              <span class="label">无语</span>
+              <span class="emoji">😑</span><span class="label">无语</span>
             </button>
             <button class="mood-btn sad" data-mood="伤心emo" data-emoji="😢" onclick="selectMood(this)">
-              <span class="emoji">😢</span>
-              <span class="label">伤心emo</span>
+              <span class="emoji">😢</span><span class="label">伤心emo</span>
             </button>
             <button class="mood-btn numb" data-mood="无感" data-emoji="😶" onclick="selectMood(this)">
-              <span class="emoji">😶</span>
-              <span class="label">无感</span>
+              <span class="emoji">😶</span><span class="label">无感</span>
+            </button>
+            <button class="mood-btn confused" data-mood="疑惑" data-emoji="🤔" onclick="selectMood(this)">
+              <span class="emoji">🤔</span><span class="label">疑惑</span>
             </button>
             <button class="mood-btn anxious" data-mood="焦虑" data-emoji="😰" onclick="selectMood(this)">
-              <span class="emoji">😰</span>
-              <span class="label">焦虑</span>
+              <span class="emoji">😰</span><span class="label">焦虑</span>
             </button>
           </div>
         </div>
         <div class="msg-input-area" id="msg-input-area">
           <div class="msg-input-row">
             <input class="msg-input" id="msg-input" type="text" placeholder="想对 ta 说点什么？（可选）" maxlength="100">
+            <div class="btn-photo" id="btn-photo" title="添加照片">
+              📷
+              <input type="file" id="photo-input" accept="image/*">
+            </div>
             <button class="btn-send" onclick="sendMood()">发送</button>
+          </div>
+          <div class="photo-preview-strip" id="photo-preview-strip">
+            <img id="photo-preview-img" src="" alt="preview">
+            <button class="remove-photo" onclick="removePhoto()">✕</button>
           </div>
         </div>
       </div>
 
       <div class="module" id="history-module">
-        <div class="module-title">收到的心情</div>
+        <div class="module-title">心情互动</div>
         <div class="history-list" id="history-list">
           <div class="empty-state" id="empty-state">
             <div class="empty-illustration">🧸</div>
-            <div class="empty-text">安静地等待一份心情到来...</div>
+            <div class="empty-text">还没有心情互动～<br>先选个表情打个招呼吧 😊</div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Toast 容器 -->
   <div class="toast-container" id="toast-container"></div>
 
-  <!-- 通知音效 -->
   <audio id="notif-sound" preload="auto">
     <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgipGLfWxucICRkYV0ZGVxf4mMiH91cHR8hYmHgXl1d3yBhYSBfXt7fYCCgoB+fX1+gIGBgH9+fn+AgYGAf39/f4CAgIB/f3+AgICAgH9/gICAgICAf4CAgICAgICAgICAgICAgA==" type="audio/wav">
   </audio>
@@ -802,8 +900,8 @@
     let selectedTarget = '';
     let selectedMoodBtn = null;
     let reconnectTimer = null;
+    let pendingPhoto = null;
 
-    // DOM
     const loginScreen = document.getElementById('login-screen');
     const mainScreen = document.getElementById('main-screen');
     const usernameInput = document.getElementById('username-input');
@@ -817,25 +915,29 @@
     const toastContainer = document.getElementById('toast-container');
     const msgInputArea = document.getElementById('msg-input-area');
     const msgInput = document.getElementById('msg-input');
+    const photoInput = document.getElementById('photo-input');
+    const photoPreviewStrip = document.getElementById('photo-preview-strip');
+    const photoPreviewImg = document.getElementById('photo-preview-img');
+    const btnPhoto = document.getElementById('btn-photo');
 
-    // ===== 漂浮粒子 =====
+    // 漂浮粒子（速度降低30%）
     function createParticles() {
       const container = document.getElementById('particles');
       const symbols = ['♥', '✦', '♡', '·', '✧', '♥', '✦'];
-      for (let i = 0; i < 20; i++) {
+      for (let i = 0; i < 18; i++) {
         const p = document.createElement('span');
         p.className = 'particle';
         p.textContent = symbols[Math.floor(Math.random() * symbols.length)];
         p.style.left = Math.random() * 100 + '%';
         p.style.fontSize = (12 + Math.random() * 16) + 'px';
-        p.style.animationDuration = (12 + Math.random() * 18) + 's';
+        p.style.animationDuration = (18 + Math.random() * 22) + 's';
         p.style.animationDelay = (Math.random() * 15) + 's';
         container.appendChild(p);
       }
     }
     createParticles();
 
-    // ===== 登录 =====
+    // 登录
     loginBtn.addEventListener('click', login);
     usernameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') roomInput.focus(); });
     roomInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') login(); });
@@ -845,13 +947,11 @@
       const room = roomInput.value.trim();
       if (!name) { usernameInput.style.borderColor = '#e091c9'; usernameInput.focus(); return; }
       if (!room) { roomInput.style.borderColor = '#e091c9'; roomInput.focus(); return; }
-
       currentUser = name;
       currentRoom = room;
       displayName.textContent = name;
       loginScreen.classList.remove('active');
       mainScreen.classList.add('active');
-
       requestNotificationPermission();
       connectWebSocket();
     }
@@ -862,7 +962,7 @@
       }
     }
 
-    // ===== WebSocket =====
+    // WebSocket
     function connectWebSocket() {
       const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
       ws = new WebSocket(`${protocol}//${location.host}`);
@@ -878,6 +978,11 @@
         const msg = JSON.parse(event.data);
         if (msg.type === 'user_list') renderUserList(msg.users);
         if (msg.type === 'mood_notification') handleMoodNotification(msg);
+        if (msg.type === 'mood_sent_confirm') handleSentConfirm(msg);
+        if (msg.type === 'read_receipt') handleReadReceipt(msg);
+        if (msg.type === 'user_online') showOnlineToast(msg.username, true);
+        if (msg.type === 'user_offline') showOnlineToast(msg.username, false);
+        if (msg.type === 'msg_recalled') handleRecall(msg);
       };
 
       ws.onclose = () => {
@@ -889,7 +994,16 @@
       ws.onerror = () => { ws.close(); };
     }
 
-    // ===== 用户列表 =====
+    // 上下线提醒
+    function showOnlineToast(username, isOnline) {
+      const el = document.createElement('div');
+      el.className = 'online-toast';
+      el.textContent = isOnline ? `${username} 已上线 ✨` : `${username} 已离线 💤`;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 3000);
+    }
+
+    // 用户列表
     function renderUserList(users) {
       const others = users.filter(u => u !== currentUser);
       if (others.length === 0) {
@@ -904,12 +1018,10 @@
         selectedTarget = '';
         return;
       }
-
       userList.innerHTML = others.map(u => {
         const sel = u === selectedTarget ? 'selected' : '';
         return `<div class="user-chip ${sel}" onclick="selectTarget('${u}')">${u}</div>`;
       }).join('');
-
       if (!others.includes(selectedTarget)) {
         selectedTarget = others.length === 1 ? others[0] : '';
         if (others.length === 1) renderUserList(users);
@@ -923,7 +1035,7 @@
       });
     }
 
-    // ===== 复制链接 =====
+    // 复制链接
     function copyLink() {
       navigator.clipboard.writeText(location.href).then(() => {
         const btn = document.querySelector('.btn-copy');
@@ -935,7 +1047,49 @@
       });
     }
 
-    // ===== 选择心情 =====
+    // 照片处理
+    photoInput.addEventListener('change', handlePhotoSelect);
+
+    function handlePhotoSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxSize = 600;
+          let w = img.width, h = img.height;
+          if (w > h) { if (w > maxSize) { h = h * maxSize / w; w = maxSize; } }
+          else { if (h > maxSize) { w = w * maxSize / h; h = maxSize; } }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          let quality = 0.8;
+          let dataUrl = canvas.toDataURL('image/jpeg', quality);
+          while (dataUrl.length > 200 * 1024 && quality > 0.1) {
+            quality -= 0.1;
+            dataUrl = canvas.toDataURL('image/jpeg', quality);
+          }
+          pendingPhoto = dataUrl;
+          photoPreviewImg.src = dataUrl;
+          photoPreviewStrip.classList.add('visible');
+          btnPhoto.classList.add('has-photo');
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removePhoto() {
+      pendingPhoto = null;
+      photoInput.value = '';
+      photoPreviewStrip.classList.remove('visible');
+      btnPhoto.classList.remove('has-photo');
+    }
+
+    // 选择心情
     function selectMood(btn) {
       document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected-mood'));
       btn.classList.add('selected-mood');
@@ -944,74 +1098,105 @@
       msgInput.focus();
     }
 
-    // ===== 发送心情 =====
+    // 发送心情
     function sendMood() {
       if (!selectedTarget) { showToast('⚠️', '请先选择发送对象'); return; }
       if (!selectedMoodBtn) { showToast('⚠️', '请先选择一个心情'); return; }
-
       const mood = selectedMoodBtn.dataset.mood;
       const emoji = selectedMoodBtn.dataset.emoji;
       const message = msgInput.value.trim();
-
       ws.send(JSON.stringify({
-        type: 'mood',
-        from: currentUser,
-        to: selectedTarget,
-        mood, emoji, message
+        type: 'mood', from: currentUser, to: selectedTarget,
+        mood, emoji, message, photo: pendingPhoto || ''
       }));
-
       selectedMoodBtn.classList.add('sent');
       const btn = selectedMoodBtn;
-      setTimeout(() => {
-        btn.classList.remove('sent');
-        btn.classList.remove('selected-mood');
-      }, 1000);
-
+      setTimeout(() => { btn.classList.remove('sent'); btn.classList.remove('selected-mood'); }, 1000);
       selectedMoodBtn = null;
       msgInput.value = '';
+      removePhoto();
       msgInputArea.classList.remove('visible');
-
       showToast(emoji, `已发送「${mood}」给 ${selectedTarget}`);
     }
 
-    // Enter 键发送
     msgInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMood(); });
 
-    // ===== 收到心情通知 =====
+    // 自己发送确认
+    function handleSentConfirm(msg) {
+      const { msgId, to, mood, emoji, message, photo, timestamp } = msg;
+      addToHistory('我', mood, emoji, message, timestamp, true, msgId, photo, to);
+    }
+
+    // 收到心情
     function handleMoodNotification(msg) {
-      const { from, mood, emoji, message, timestamp } = msg;
-      showNotificationOverlay(from, mood, emoji, message, timestamp);
+      const { msgId, from, mood, emoji, message, photo, timestamp } = msg;
+      ws.send(JSON.stringify({ type: 'mark_read', msgId, reader: currentUser }));
+      showNotificationOverlay(from, mood, emoji, message, photo, timestamp);
       showToast(emoji, `${from}「${mood}」`);
       sendBrowserNotification(from, mood, emoji, message);
       playNotifSound();
-      addToHistory(from, mood, emoji, message, timestamp);
+      addToHistory(from, mood, emoji, message, timestamp, false, msgId, photo, '');
     }
 
-    function showNotificationOverlay(from, mood, emoji, message, timestamp) {
+    // 已读回执
+    function handleReadReceipt(msg) {
+      const el = document.querySelector(`[data-msg-id="${msg.msgId}"] .b-read-status`);
+      if (el) {
+        el.className = 'b-read-status read';
+        el.innerHTML = '<span class="check-icon">✓✓</span> 已读';
+      }
+    }
+
+    // 撤回
+    function handleRecall(msg) {
+      const el = document.querySelector(`[data-msg-id="${msg.msgId}"]`);
+      if (el) {
+        el.classList.add('recalled');
+        el.querySelector('.b-emoji').textContent = '';
+        el.querySelector('.b-content').innerHTML = '<span style="font-size:12px;color:#ccc;font-style:italic">该消息已撤回</span>';
+        showToast('↩️', `${msg.by} 撤回了一条消息`);
+      }
+    }
+
+    function recallMessage(msgId) {
+      ws.send(JSON.stringify({ type: 'recall', msgId }));
+    }
+
+    // 照片放大
+    function showPhotoLightbox(src) {
+      const lb = document.createElement('div');
+      lb.className = 'photo-lightbox';
+      lb.innerHTML = '<img src="' + src + '">';
+      lb.addEventListener('click', () => lb.remove());
+      document.body.appendChild(lb);
+    }
+
+    function showNotificationOverlay(from, mood, emoji, message, photo, timestamp) {
       const time = new Date(timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
       const overlay = document.createElement('div');
       overlay.className = 'notification-overlay';
-      const msgHtml = message ? `<div class="notif-msg">"${message}"</div>` : '';
-      overlay.innerHTML = `
-        <div class="notification-card">
-          <div class="notif-emoji">${emoji}</div>
-          <div class="notif-title">收到一份心情</div>
-          <div class="notif-body"><strong>${from}</strong> 现在是 <strong>${mood}</strong> 的状态</div>
-          ${msgHtml}
-          <div class="notif-time">${time}</div>
-          <button class="btn-dismiss" onclick="this.closest('.notification-overlay').remove()">知道了</button>
-        </div>`;
+      const msgHtml = message ? '<div class="notif-msg">"' + message + '"</div>' : '';
+      const photoHtml = photo ? '<img class="notif-photo" src="' + photo + '" onclick="event.stopPropagation(); showPhotoLightbox(this.src)">' : '';
+      overlay.innerHTML =
+        '<div class="notification-card">' +
+          '<div class="notif-emoji">' + emoji + '</div>' +
+          '<div class="notif-title">收到一份心情</div>' +
+          '<div class="notif-body"><strong>' + from + '</strong> 现在是 <strong>' + mood + '</strong> 的状态</div>' +
+          msgHtml + photoHtml +
+          '<div class="notif-time">' + time + '</div>' +
+          '<button class="btn-dismiss" onclick="this.closest(\'.notification-overlay\').remove()">知道了</button>' +
+        '</div>';
       document.body.appendChild(overlay);
       overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
     }
 
     function sendBrowserNotification(from, mood, emoji, message) {
       if ('Notification' in window && Notification.permission === 'granted') {
-        let body = `${from} 现在是「${mood}」的状态`;
-        if (message) body += `\n"${message}"`;
-        const notif = new Notification(`${emoji} Moodlink`, {
+        let body = from + ' 现在是「' + mood + '」的状态';
+        if (message) body += '\n"' + message + '"';
+        const notif = new Notification(emoji + ' Moodlink', {
           body,
-          icon: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">${emoji}</text></svg>`,
+          icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">' + emoji + '</text></svg>',
           tag: 'mood-' + Date.now(),
           requireInteraction: true
         });
@@ -1022,7 +1207,7 @@
     function showToast(emoji, text) {
       const toast = document.createElement('div');
       toast.className = 'toast';
-      toast.innerHTML = `<span class="toast-emoji">${emoji}</span><span class="toast-text">${text}</span>`;
+      toast.innerHTML = '<span class="toast-emoji">' + emoji + '</span><span class="toast-text">' + text + '</span>';
       toastContainer.appendChild(toast);
       setTimeout(() => toast.remove(), 5000);
     }
@@ -1035,25 +1220,44 @@
       } catch(e) {}
     }
 
-    function addToHistory(from, mood, emoji, message, timestamp) {
+    function addToHistory(from, mood, emoji, message, timestamp, isSent, msgId, photo, target) {
       const time = new Date(timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
       const empty = document.getElementById('empty-state');
       if (empty) empty.remove();
 
-      const msgHtml = message ? `<div class="b-msg">"${message}"</div>` : '';
+      const msgHtml = message ? '<div class="b-msg">"' + message + '"</div>' : '';
+      const photoHtml = photo ? '<img class="b-photo" src="' + photo + '" onclick="showPhotoLightbox(this.src)">' : '';
+      const readStatusHtml = isSent ? '<span class="b-read-status unread"><span class="check-icon">✓</span> 未读</span>' : '';
+      const recallHtml = isSent ? '<button class="b-recall" onclick="recallMessage(' + msgId + ')">撤回</button>' : '';
+      const nameLabel = isSent ? '我 → ' + target : from;
+
       const bubble = document.createElement('div');
-      bubble.className = 'bubble';
-      bubble.innerHTML = `
-        <span class="b-emoji">${emoji}</span>
-        <div class="b-content">
-          <div class="b-header">
-            <span class="b-name">${from}</span>
-            <span class="b-mood">${mood}</span>
-          </div>
-          ${msgHtml}
-          <div class="b-time">${time}</div>
-        </div>`;
+      bubble.className = isSent ? 'bubble sent-bubble' : 'bubble';
+      bubble.setAttribute('data-msg-id', msgId);
+
+      bubble.innerHTML =
+        '<span class="b-emoji">' + emoji + '</span>' +
+        '<div class="b-content">' +
+          '<div class="b-header">' +
+            '<span class="b-name">' + nameLabel + '</span>' +
+            '<span class="b-mood">' + mood + '</span>' +
+          '</div>' +
+          msgHtml + photoHtml +
+          '<div class="b-footer">' +
+            '<span class="b-time">' + time + '</span>' +
+            readStatusHtml + recallHtml +
+          '</div>' +
+        '</div>';
+
       historyList.insertBefore(bubble, historyList.firstChild);
+
+      // 10分钟后隐藏撤回按钮
+      if (isSent) {
+        setTimeout(() => {
+          const recallBtn = bubble.querySelector('.b-recall');
+          if (recallBtn) recallBtn.style.display = 'none';
+        }, 10 * 60 * 1000);
+      }
     }
   </script>
 </body>
