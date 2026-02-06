@@ -10,37 +10,40 @@ const wss = new WebSocket.Server({ server });
 // 静态文件服务
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 存储在线用户 { ws, username }
+// 存储在线用户 { ws -> { username, room } }
 const clients = new Map();
 
 wss.on('connection', (ws) => {
   let currentUser = null;
+  let currentRoom = null;
 
   ws.on('message', (data) => {
     try {
       const msg = JSON.parse(data);
 
-      // 用户注册
+      // 用户注册（带房间号）
       if (msg.type === 'register') {
         currentUser = msg.username;
-        clients.set(ws, currentUser);
-        broadcastUserList();
-        console.log(`[上线] ${currentUser}`);
+        currentRoom = msg.room;
+        clients.set(ws, { username: currentUser, room: currentRoom });
+        broadcastUserList(currentRoom);
+        console.log(`[上线] ${currentUser} -> 房间 ${currentRoom}`);
       }
 
-      // 发送心情
+      // 发送心情（带附加文字）
       if (msg.type === 'mood') {
-        const { to, mood, emoji, from } = msg;
-        console.log(`[心情] ${from} -> ${to}: ${mood} ${emoji}`);
+        const { to, mood, emoji, from, message } = msg;
+        console.log(`[心情] ${from} -> ${to}: ${mood} ${emoji} ${message || ''}`);
 
-        // 找到目标用户并推送
-        for (const [clientWs, username] of clients) {
-          if (username === to && clientWs.readyState === WebSocket.OPEN) {
+        // 找到同房间的目标用户并推送
+        for (const [clientWs, info] of clients) {
+          if (info.username === to && info.room === currentRoom && clientWs.readyState === WebSocket.OPEN) {
             clientWs.send(JSON.stringify({
               type: 'mood_notification',
               from,
               mood,
               emoji,
+              message: message || '',
               timestamp: new Date().toISOString()
             }));
           }
@@ -55,16 +58,23 @@ wss.on('connection', (ws) => {
     if (currentUser) {
       console.log(`[下线] ${currentUser}`);
       clients.delete(ws);
-      broadcastUserList();
+      if (currentRoom) broadcastUserList(currentRoom);
     }
   });
 });
 
-// 广播在线用户列表
-function broadcastUserList() {
-  const userList = Array.from(clients.values());
-  const msg = JSON.stringify({ type: 'user_list', users: userList });
-  for (const [clientWs] of clients) {
+// 只广播同一房间的在线用户列表
+function broadcastUserList(room) {
+  const roomUsers = [];
+  const roomClients = [];
+  for (const [clientWs, info] of clients) {
+    if (info.room === room) {
+      roomUsers.push(info.username);
+      roomClients.push(clientWs);
+    }
+  }
+  const msg = JSON.stringify({ type: 'user_list', users: roomUsers });
+  for (const clientWs of roomClients) {
     if (clientWs.readyState === WebSocket.OPEN) {
       clientWs.send(msg);
     }
@@ -73,5 +83,5 @@ function broadcastUserList() {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`🚀 心情信使服务已启动: http://localhost:${PORT}`);
+  console.log(`🚀 Moodlink 已启动: http://localhost:${PORT}`);
 });
