@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>心情信使 💌</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+    }
+
+    /* 登录卡片 */
+    .card {
+      background: rgba(255,255,255,0.95);
+      border-radius: 24px;
+      padding: 40px 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+      backdrop-filter: blur(10px);
+      animation: slideUp 0.5s ease;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card h1 {
+      text-align: center;
+      font-size: 28px;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .card .subtitle {
+      text-align: center;
+      color: #888;
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 14px 18px;
+      border: 2px solid #e8e8e8;
+      border-radius: 14px;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    .input-group input:focus {
+      border-color: #667eea;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    /* 主界面 */
+    #login-screen, #main-screen { display: none; }
+    #login-screen.active, #main-screen.active { display: block; }
+
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 24px;
+    }
+
+    .header h2 {
+      font-size: 22px;
+      margin-bottom: 4px;
+    }
+
+    .header p {
+      opacity: 0.8;
+      font-size: 14px;
+    }
+
+    /* 目标用户选择 */
+    .target-section {
+      background: rgba(255,255,255,0.95);
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+
+    .target-section h3 {
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 12px;
+    }
+
+    .user-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .user-chip {
+      padding: 10px 20px;
+      background: #f0f0f5;
+      border-radius: 25px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 2px solid transparent;
+      font-weight: 500;
+      color: #444;
+    }
+
+    .user-chip:hover {
+      background: #e8e8f0;
+    }
+
+    .user-chip.selected {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border-color: transparent;
+    }
+
+    .no-users {
+      color: #aaa;
+      font-size: 14px;
+      padding: 10px 0;
+    }
+
+    /* 心情选择网格 */
+    .mood-section {
+      background: rgba(255,255,255,0.95);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+
+    .mood-section h3 {
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 16px;
+    }
+
+    .mood-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .mood-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 8px;
+      border: none;
+      border-radius: 18px;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: #f7f7fa;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mood-btn:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    .mood-btn:active {
+      transform: scale(0.95);
+    }
+
+    .mood-btn .emoji {
+      font-size: 40px;
+      margin-bottom: 8px;
+      transition: transform 0.3s;
+    }
+
+    .mood-btn:hover .emoji {
+      transform: scale(1.2);
+    }
+
+    .mood-btn .label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #555;
+    }
+
+    .mood-btn.happy { background: linear-gradient(135deg, #fff9c4, #fff176); }
+    .mood-btn.happy .label { color: #f57f17; }
+
+    .mood-btn.unhappy { background: linear-gradient(135deg, #e3f2fd, #90caf9); }
+    .mood-btn.unhappy .label { color: #1565c0; }
+
+    .mood-btn.angry { background: linear-gradient(135deg, #ffebee, #ef9a9a); }
+    .mood-btn.angry .label { color: #c62828; }
+
+    .mood-btn.speechless { background: linear-gradient(135deg, #f3e5f5, #ce93d8); }
+    .mood-btn.speechless .label { color: #6a1b9a; }
+
+    .mood-btn.sad { background: linear-gradient(135deg, #e8eaf6, #9fa8da); }
+    .mood-btn.sad .label { color: #283593; }
+
+    .mood-btn.numb { background: linear-gradient(135deg, #eceff1, #b0bec5); }
+    .mood-btn.numb .label { color: #37474f; }
+
+    .mood-btn.anxious { background: linear-gradient(135deg, #fff3e0, #ffcc80); }
+    .mood-btn.anxious .label { color: #e65100; }
+
+    /* 发送成功动画 */
+    .mood-btn.sent::after {
+      content: '✓';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 36px;
+      color: white;
+      background: rgba(76, 175, 80, 0.9);
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 18px;
+      animation: sentFade 1.2s ease forwards;
+    }
+
+    @keyframes sentFade {
+      0% { opacity: 1; }
+      70% { opacity: 1; }
+      100% { opacity: 0; pointer-events: none; }
+    }
+
+    /* 通知弹窗 */
+    .notification-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      animation: fadeIn 0.3s ease;
+      padding: 20px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .notification-card {
+      background: white;
+      border-radius: 28px;
+      padding: 48px 36px;
+      text-align: center;
+      max-width: 360px;
+      width: 100%;
+      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 25px 80px rgba(0,0,0,0.2);
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.7); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .notification-card .notif-emoji {
+      font-size: 80px;
+      margin-bottom: 16px;
+      animation: bounce 0.6s ease infinite alternate;
+    }
+
+    @keyframes bounce {
+      from { transform: translateY(0); }
+      to { transform: translateY(-10px); }
+    }
+
+    .notification-card .notif-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .notification-card .notif-body {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+
+    .notification-card .notif-time {
+      font-size: 12px;
+      color: #aaa;
+      margin-bottom: 20px;
+    }
+
+    .btn-dismiss {
+      padding: 14px 48px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .btn-dismiss:hover {
+      transform: translateY(-2px);
+    }
+
+    /* Toast 通知 (顶部小条) */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast {
+      background: white;
+      border-radius: 16px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+      animation: slideIn 0.4s ease, slideOut 0.4s ease 4.6s forwards;
+      min-width: 280px;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(100px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes slideOut {
+      from { opacity: 1; transform: translateX(0); }
+      to { opacity: 0; transform: translateX(100px); }
+    }
+
+    .toast .toast-emoji { font-size: 32px; }
+    .toast .toast-text { font-size: 14px; color: #333; font-weight: 500; }
+
+    /* 历史记录 */
+    .history-section {
+      background: rgba(255,255,255,0.95);
+      border-radius: 20px;
+      padding: 24px;
+      margin-top: 16px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+
+    .history-section h3 {
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 12px;
+    }
+
+    .history-list {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .history-item:last-child { border-bottom: none; }
+    .history-item .h-emoji { font-size: 24px; }
+    .history-item .h-time { color: #aaa; font-size: 12px; margin-left: auto; }
+
+    .empty-history {
+      color: #bbb;
+      font-size: 14px;
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    /* 连接状态 */
+    .status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+    .status-dot.online { background: #4caf50; }
+    .status-dot.offline { background: #f44336; }
+
+    /* 响应式 */
+    @media (max-width: 400px) {
+      .mood-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+      .mood-btn .emoji { font-size: 32px; }
+      .card { padding: 28px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 登录界面 -->
+  <div class="container">
+    <div id="login-screen" class="active">
+      <div class="card">
+        <h1>💌 心情信使</h1>
+        <p class="subtitle">把你的心情，传达给在乎的人</p>
+        <div class="input-group">
+          <label>你的昵称</label>
+          <input type="text" id="username-input" placeholder="输入你的昵称..." maxlength="20" autocomplete="off">
+        </div>
+        <button class="btn-primary" id="login-btn">进入 →</button>
+      </div>
+    </div>
+
+    <!-- 主界面 -->
+    <div id="main-screen">
+      <div class="header">
+        <h2>💌 心情信使</h2>
+        <p><span class="status-dot online" id="status-dot"></span><span id="status-text">已连接</span> · 欢迎, <span id="display-name"></span></p>
+      </div>
+
+      <div class="target-section">
+        <h3>📬 发送给谁？</h3>
+        <div class="user-list" id="user-list">
+          <div class="no-users">暂无其他在线用户，等待对方上线...</div>
+        </div>
+      </div>
+
+      <div class="mood-section">
+        <h3>💭 你现在的心情是？</h3>
+        <div class="mood-grid" id="mood-grid">
+          <button class="mood-btn happy" data-mood="开心" data-emoji="😄" onclick="sendMood(this)">
+            <span class="emoji">😄</span>
+            <span class="label">开心</span>
+          </button>
+          <button class="mood-btn unhappy" data-mood="不开心" data-emoji="😞" onclick="sendMood(this)">
+            <span class="emoji">😞</span>
+            <span class="label">不开心</span>
+          </button>
+          <button class="mood-btn angry" data-mood="生气" data-emoji="😡" onclick="sendMood(this)">
+            <span class="emoji">😡</span>
+            <span class="label">生气</span>
+          </button>
+          <button class="mood-btn speechless" data-mood="无语" data-emoji="😑" onclick="sendMood(this)">
+            <span class="emoji">😑</span>
+            <span class="label">无语</span>
+          </button>
+          <button class="mood-btn sad" data-mood="伤心emo" data-emoji="😢" onclick="sendMood(this)">
+            <span class="emoji">😢</span>
+            <span class="label">伤心emo</span>
+          </button>
+          <button class="mood-btn numb" data-mood="无感" data-emoji="😶" onclick="sendMood(this)">
+            <span class="emoji">😶</span>
+            <span class="label">无感</span>
+          </button>
+          <button class="mood-btn anxious" data-mood="焦虑" data-emoji="😰" onclick="sendMood(this)">
+            <span class="emoji">😰</span>
+            <span class="label">焦虑</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="history-section">
+        <h3>📋 收到的心情</h3>
+        <div class="history-list" id="history-list">
+          <div class="empty-history">还没有收到心情消息~</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast 容器 -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- 通知音效 -->
+  <audio id="notif-sound" preload="auto">
+    <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgipGLfWxucICRkYV0ZGVxf4mMiH91cHR8hYmHgXl1d3yBhYSBfXt7fYCCgoB+fX1+gIGBgH9+fn+AgYGAf39/f4CAgIB/f3+AgICAgH9/gICAgICAf4CAgICAgICAgICAgICAgA==" type="audio/wav">
+  </audio>
+
+  <script>
+    let ws = null;
+    let currentUser = '';
+    let selectedTarget = '';
+    let reconnectTimer = null;
+
+    // DOM 元素
+    const loginScreen = document.getElementById('login-screen');
+    const mainScreen = document.getElementById('main-screen');
+    const usernameInput = document.getElementById('username-input');
+    const loginBtn = document.getElementById('login-btn');
+    const displayName = document.getElementById('display-name');
+    const userList = document.getElementById('user-list');
+    const historyList = document.getElementById('history-list');
+    const statusDot = document.getElementById('status-dot');
+    const statusText = document.getElementById('status-text');
+    const toastContainer = document.getElementById('toast-container');
+
+    // 登录
+    loginBtn.addEventListener('click', login);
+    usernameInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') login();
+    });
+
+    function login() {
+      const name = usernameInput.value.trim();
+      if (!name) {
+        usernameInput.style.borderColor = '#f44336';
+        usernameInput.focus();
+        return;
+      }
+      currentUser = name;
+      displayName.textContent = name;
+      loginScreen.classList.remove('active');
+      mainScreen.classList.add('active');
+
+      // 请求通知权限
+      requestNotificationPermission();
+
+      // 连接 WebSocket
+      connectWebSocket();
+    }
+
+    // 请求浏览器通知权限
+    function requestNotificationPermission() {
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+    }
+
+    // WebSocket 连接
+    function connectWebSocket() {
+      const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(`${protocol}//${location.host}`);
+
+      ws.onopen = () => {
+        statusDot.className = 'status-dot online';
+        statusText.textContent = '已连接';
+        ws.send(JSON.stringify({ type: 'register', username: currentUser }));
+        if (reconnectTimer) {
+          clearTimeout(reconnectTimer);
+          reconnectTimer = null;
+        }
+      };
+
+      ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+
+        if (msg.type === 'user_list') {
+          renderUserList(msg.users);
+        }
+
+        if (msg.type === 'mood_notification') {
+          handleMoodNotification(msg);
+        }
+      };
+
+      ws.onclose = () => {
+        statusDot.className = 'status-dot offline';
+        statusText.textContent = '已断开，重连中...';
+        reconnectTimer = setTimeout(connectWebSocket, 3000);
+      };
+
+      ws.onerror = () => {
+        ws.close();
+      };
+    }
+
+    // 渲染在线用户列表
+    function renderUserList(users) {
+      const others = users.filter(u => u !== currentUser);
+      if (others.length === 0) {
+        userList.innerHTML = '<div class="no-users">暂无其他在线用户，等待对方上线...</div>';
+        selectedTarget = '';
+        return;
+      }
+
+      userList.innerHTML = others.map(u => {
+        const selected = u === selectedTarget ? 'selected' : '';
+        return `<div class="user-chip ${selected}" onclick="selectTarget('${u}')">${u}</div>`;
+      }).join('');
+
+      // 如果之前选中的用户不在列表中，清除选择
+      if (!others.includes(selectedTarget)) {
+        selectedTarget = others.length === 1 ? others[0] : '';
+        if (others.length === 1) {
+          renderUserList(users);
+        }
+      }
+    }
+
+    // 选择目标用户
+    function selectTarget(username) {
+      selectedTarget = username;
+      document.querySelectorAll('.user-chip').forEach(chip => {
+        chip.classList.toggle('selected', chip.textContent === username);
+      });
+    }
+
+    // 发送心情
+    function sendMood(btn) {
+      if (!selectedTarget) {
+        showToast('⚠️', '请先选择要发送的对象');
+        return;
+      }
+
+      const mood = btn.dataset.mood;
+      const emoji = btn.dataset.emoji;
+
+      ws.send(JSON.stringify({
+        type: 'mood',
+        from: currentUser,
+        to: selectedTarget,
+        mood,
+        emoji
+      }));
+
+      // 发送成功动画
+      btn.classList.add('sent');
+      setTimeout(() => btn.classList.remove('sent'), 1200);
+
+      showToast(emoji, `已发送「${mood}」给 ${selectedTarget}`);
+    }
+
+    // 处理收到的心情通知
+    function handleMoodNotification(msg) {
+      const { from, mood, emoji, timestamp } = msg;
+
+      // 1. 页面内弹窗
+      showNotificationOverlay(from, mood, emoji, timestamp);
+
+      // 2. 顶部 Toast
+      showToast(emoji, `${from} 现在的心情是「${mood}」`);
+
+      // 3. 浏览器系统通知（手机/电脑弹窗）
+      sendBrowserNotification(from, mood, emoji);
+
+      // 4. 播放提示音
+      playNotifSound();
+
+      // 5. 添加到历史记录
+      addToHistory(from, mood, emoji, timestamp);
+    }
+
+    // 页面内大弹窗
+    function showNotificationOverlay(from, mood, emoji, timestamp) {
+      const time = new Date(timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+      const overlay = document.createElement('div');
+      overlay.className = 'notification-overlay';
+      overlay.innerHTML = `
+        <div class="notification-card">
+          <div class="notif-emoji">${emoji}</div>
+          <div class="notif-title">收到一条心情消息</div>
+          <div class="notif-body"><strong>${from}</strong> 现在是<strong>「${mood}」</strong>的状态</div>
+          <div class="notif-time">${time}</div>
+          <button class="btn-dismiss" onclick="this.closest('.notification-overlay').remove()">知道了</button>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+
+      // 点击背景关闭
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.remove();
+      });
+    }
+
+    // 浏览器系统通知
+    function sendBrowserNotification(from, mood, emoji) {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        const notif = new Notification(`${emoji} 心情信使`, {
+          body: `${from} 现在是「${mood}」的状态`,
+          icon: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">${emoji}</text></svg>`,
+          tag: 'mood-' + Date.now(),
+          requireInteraction: true
+        });
+
+        notif.onclick = () => {
+          window.focus();
+          notif.close();
+        };
+      }
+    }
+
+    // Toast 小通知
+    function showToast(emoji, text) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `
+        <span class="toast-emoji">${emoji}</span>
+        <span class="toast-text">${text}</span>
+      `;
+      toastContainer.appendChild(toast);
+      setTimeout(() => toast.remove(), 5000);
+    }
+
+    // 播放提示音
+    function playNotifSound() {
+      try {
+        const sound = document.getElementById('notif-sound');
+        sound.currentTime = 0;
+        sound.play().catch(() => {});
+      } catch(e) {}
+    }
+
+    // 添加到历史记录
+    function addToHistory(from, mood, emoji, timestamp) {
+      const time = new Date(timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+      const emptyMsg = historyList.querySelector('.empty-history');
+      if (emptyMsg) emptyMsg.remove();
+
+      const item = document.createElement('div');
+      item.className = 'history-item';
+      item.innerHTML = `
+        <span class="h-emoji">${emoji}</span>
+        <span>${from} 觉得「${mood}」</span>
+        <span class="h-time">${time}</span>
+      `;
+      historyList.insertBefore(item, historyList.firstChild);
+    }
+  </script>
+</body>
+</html>

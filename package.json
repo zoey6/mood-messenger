@@ -1,0 +1,14 @@
+{
+  "name": "mood-messenger",
+  "version": "1.0.0",
+  "description": "发送心情给另一个人，实时通知",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.16.0"
+  }
+}
